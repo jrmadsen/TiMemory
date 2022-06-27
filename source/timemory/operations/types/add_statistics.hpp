@@ -33,6 +33,7 @@
 #include "timemory/operations/declaration.hpp"
 #include "timemory/operations/macros.hpp"
 #include "timemory/operations/types.hpp"
+#include "timemory/utility/demangle.hpp"
 
 namespace tim
 {
@@ -149,7 +150,7 @@ struct add_statistics
     template <typename StatsT, typename U = type>
     TIMEMORY_INLINE void operator()(
         const U& rhs, StatsT& stats, bool _last = false,
-        enable_if_t<enabled_statistics<U, StatsT>::value, int> = 0) const;
+        enable_if_t<stats_enabled<U, StatsT>::value, int> = 0) const;
 
     //----------------------------------------------------------------------------------//
     // if statistics is not enabled
@@ -157,7 +158,7 @@ struct add_statistics
     template <typename StatsT, typename U = type>
     TIMEMORY_INLINE void operator()(
         const U&, StatsT&, bool = true,
-        enable_if_t<!enabled_statistics<U, StatsT>::value, int> = 0) const
+        enable_if_t<!stats_enabled<U, StatsT>::value, int> = 0) const
     {}
 
 private:
@@ -192,9 +193,8 @@ private:
 template <typename T>
 template <typename StatsT, typename U>
 void
-add_statistics<T>::operator()(
-    const U& rhs, StatsT& stats, bool _last,
-    enable_if_t<enabled_statistics<U, StatsT>::value, int>) const
+add_statistics<T>::operator()(const U& rhs, StatsT& stats, bool _last,
+                              enable_if_t<stats_enabled<U, StatsT>::value, int>) const
 {
     // for type comparison
     using incoming_t = decay_t<typename StatsT::value_type>;

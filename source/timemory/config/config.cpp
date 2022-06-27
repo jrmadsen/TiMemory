@@ -26,6 +26,7 @@
 #define TIMEMORY_CONFIG_CONFIG_CPP_ 1
 
 #include "timemory/config/macros.hpp"
+#include "timemory/defines.h"
 
 #if defined(TIMEMORY_CONFIG_SOURCE) || !defined(TIMEMORY_USE_CONFIG_EXTERN)
 //
@@ -35,6 +36,7 @@
 #    include "timemory/manager/declaration.hpp"
 #    include "timemory/mpl/filters.hpp"
 #    include "timemory/settings/declaration.hpp"
+#    include "timemory/settings/types.hpp"
 #    include "timemory/utility/argparse.hpp"
 #    include "timemory/utility/signals.hpp"
 #    include "timemory/utility/utility.hpp"
@@ -58,6 +60,7 @@ timemory_init(int argc, char** argv, const std::string& _prefix,
     static auto _settings = settings::shared_instance();
     if(_settings)
     {
+        settings::store_command_line(argc, argv);
         if(_settings->get_debug() || _settings->get_verbose() > 3)
             TIMEMORY_PRINT_HERE("%s", "");
 
@@ -74,41 +77,42 @@ timemory_init(int argc, char** argv, const std::string& _prefix,
         _settings->init_config();
     }
 
-    std::string exe_name = (argc > 0) ? argv[0] : "";
-
-    while(exe_name.find('\\') != std::string::npos)
-        exe_name = exe_name.substr(exe_name.find_last_of('\\') + 1);
-
-    while(exe_name.find('/') != std::string::npos)
-        exe_name = exe_name.substr(exe_name.find_last_of('/') + 1);
-
-    static const std::vector<std::string> _exe_suffixes = { ".py", ".exe" };
-    for(const auto& ext : _exe_suffixes)
     {
-        if(exe_name.find(ext) != std::string::npos)
-            exe_name.erase(exe_name.find(ext), ext.length() + 1);
+        std::string exe_name = (argc > 0) ? argv[0] : "";
+
+        while(exe_name.find('\\') != std::string::npos)
+            exe_name = exe_name.substr(exe_name.find_last_of('\\') + 1);
+
+        while(exe_name.find('/') != std::string::npos)
+            exe_name = exe_name.substr(exe_name.find_last_of('/') + 1);
+
+        static const std::vector<std::string> _exe_suffixes = { ".py", ".exe" };
+        for(const auto& ext : _exe_suffixes)
+        {
+            if(exe_name.find(ext) != std::string::npos)
+                exe_name.erase(exe_name.find(ext), ext.length() + 1);
+        }
+
+        if(_settings)
+            _settings->set_tag(exe_name);
     }
 
     if(_settings)
-        _settings->set_tag(exe_name);
-
-    exe_name = _prefix + exe_name + _suffix;
-    for(auto& itr : exe_name)
     {
-        if(itr == '_')
-            itr = '-';
-    }
-
-    size_t pos = std::string::npos;
-    while((pos = exe_name.find("--")) != std::string::npos)
-        exe_name.erase(pos, 1);
-
-    if(exe_name.empty())
-        exe_name = "timemory-output";
-
-    if(_settings)
-    {
-        _settings->get_output_path() = exe_name;
+        auto _opitr = _settings->find("output_path");
+        auto _outpath =
+            (_opitr != _settings->end()) ? _opitr->second : std::shared_ptr<vsettings>{};
+        if(!_outpath->get_config_updated() && !_outpath->get_environ_updated())
+        {
+            auto _remove_double_hyphen = [](std::string _v) {
+                size_t pos = std::string::npos;
+                while((pos = _v.find("--")) != std::string::npos)
+                    _v.erase(pos, 1);
+                return _v;
+            };
+            _settings->set("output_path",
+                           _remove_double_hyphen(_prefix + "-%tag%-" + _suffix), false);
+        }
 
         // allow environment overrides
         settings::parse(_settings);
@@ -116,6 +120,10 @@ timemory_init(int argc, char** argv, const std::string& _prefix,
         if(_settings->get_enable_signal_handler())
         {
             auto _exit_action = [](int nsig) {
+                static bool _protect = false;
+                if(_protect)
+                    return;
+                _protect      = true;
                 auto _manager = manager::master_instance();
                 if(_manager)
                 {
@@ -124,11 +132,10 @@ timemory_init(int argc, char** argv, const std::string& _prefix,
                               << std::endl;
                     _manager->finalize();
                 }
+                _protect = false;
             };
             signal_settings::set_exit_action(_exit_action);
         }
-
-        settings::store_command_line(argc, argv);
     }
 
     static auto _manager = manager::instance();
@@ -149,9 +156,9 @@ TIMEMORY_CONFIG_LINKAGE(void)
 timemory_init(const std::string& exe_name, const std::string& _prefix,
               const std::string& _suffix)
 {
-    auto* cstr  = const_cast<char*>(exe_name.c_str());
+    auto* _cstr = const_cast<char*>(exe_name.c_str());
     auto  _argc = 1;
-    auto* _argv = &cstr;
+    auto* _argv = &_cstr;
     timemory_init(_argc, _argv, _prefix, _suffix);
 }
 //
@@ -308,9 +315,9 @@ timemory_argparse(int* argc, char*** argv, argparse::argument_parser* parser,
     }
 
     parser->add_argument()
-        .names({ "--timemory-args" })
+        .names({ "--" TIMEMORY_PROJECT_NAME "-args" })
         .description("A generic option for any setting. Each argument MUST be passed in "
-                     "form: 'NAME=VALUE'. E.g. --timemory-args "
+                     "form: 'NAME=VALUE'. E.g. --" TIMEMORY_PROJECT_NAME "-args "
                      "\"papi_events=PAPI_TOT_INS,PAPI_TOT_CYC\" text_output=off")
         .action([&](parser_t& p) {
             // get the options
@@ -328,7 +335,7 @@ timemory_argparse(int* argc, char*** argv, argparse::argument_parser* parser,
                     if(!_settings->update(_key, _val, false))
                     {
                         std::cerr << "[timemory_argparse]> Warning! For "
-                                     "--timemory-args, key \""
+                                     "--" TIMEMORY_PROJECT_NAME "-args, key \""
                                   << _key << "\" is not a recognized setting. \"" << _val
                                   << "\" was not applied." << std::endl;
                     }

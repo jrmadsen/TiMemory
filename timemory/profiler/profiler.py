@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!@PYTHON_EXECUTABLE@
 #
 # MIT License
 #
@@ -131,7 +131,6 @@ class Profiler:
         """Make sure the profiler stops"""
 
         self.stop()
-        sys.setprofile(self._original_function)
 
     # ---------------------------------------------------------------------------------- #
     #
@@ -256,7 +255,11 @@ class Profiler:
             # execute the wrapped function
             result = func(*args, **kwargs)
             # unset the profiler if this wrapper set it
-            self.stop()
+            # NOTE: it may get deleted so wrap in try/except
+            try:
+                self.stop()
+            except TypeError:
+                pass
             # return the result of the wrapped function
             return result
 

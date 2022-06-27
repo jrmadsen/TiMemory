@@ -123,7 +123,6 @@ class Tracer:
         """Make sure the tracer stops"""
 
         self.stop()
-        sys.settrace(self._original_function)
 
     # ---------------------------------------------------------------------------------- #
     #
@@ -242,7 +241,11 @@ class Tracer:
             # execute the wrapped function
             result = func(*args, **kwargs)
             # unset the tracer if this wrapper set it
-            self.stop()
+            # NOTE: it may get deleted so wrap in try/except
+            try:
+                self.stop()
+            except TypeError:
+                pass
             # return the result of the wrapped function
             return result
 

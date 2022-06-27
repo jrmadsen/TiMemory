@@ -66,7 +66,7 @@ do_exp_work(int nitr)
 {
 #if defined(VERBOSE)
     printf("\n");
-    PRINT_HERE("%s", "");
+    TIMEMORY_PRINT_HERE("%s", "");
     printf("\n");
 #endif
 

@@ -158,9 +158,9 @@ public:
         {
             if(settings::debug() || settings::verbose() > 2)
             {
-                PRINT_HERE("Initializing papi. is initialized: %s, is working: %s",
-                           state().is_initialized ? "y" : "n",
-                           state().is_working ? "y" : "n");
+                TIMEMORY_PRINT_HERE(
+                    "Initializing papi. is initialized: %s, is working: %s",
+                    state().is_initialized ? "y" : "n", state().is_working ? "y" : "n");
             }
             papi::init();
             papi::register_thread();
@@ -299,7 +299,8 @@ public:
             if(!_events.empty())
             {
                 if(settings::debug() || settings::verbose() > 1)
-                    PRINT_HERE("configuring %i papi events", (int) _events.size());
+                    TIMEMORY_PRINT_HERE("configuring %i papi events",
+                                        (int) _events.size());
                 papi::create_event_set(&_event_set, settings::papi_multiplexing());
                 papi::add_events(_event_set, _events.data(), _events.size());
                 if(settings::papi_overflow() > 0)
@@ -317,8 +318,8 @@ public:
             }
             if(!is_configured<Tp>())
             {
-                PRINT_HERE("Warning! Configuring %i papi events failed",
-                           (int) _events.size());
+                TIMEMORY_PRINT_HERE("Warning! Configuring %i papi events failed",
+                                    (int) _events.size());
             }
         }
     }

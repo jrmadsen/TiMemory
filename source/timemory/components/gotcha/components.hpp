@@ -935,8 +935,8 @@ private:
 
         if(!_orig)
         {
-            PRINT_HERE("nullptr to original function! wrappee: %s",
-                       _data.tool_id.c_str());
+            TIMEMORY_PRINT_HERE("nullptr to original function! wrappee: %s",
+                                _data.tool_id.c_str());
             return Ret{};
         }
 
@@ -1001,7 +1001,7 @@ private:
         return _ret;
 #else
         consume_parameters(_args...);
-        PRINT_HERE("%s", "should not be here!");
+        TIMEMORY_PRINT_HERE("%s", "should not be here!");
 #endif
         return Ret{};
     }
@@ -1025,8 +1025,8 @@ private:
 
         if(!_orig)
         {
-            PRINT_HERE("nullptr to original function! wrappee: %s",
-                       _data.tool_id.c_str());
+            TIMEMORY_PRINT_HERE("nullptr to original function! wrappee: %s",
+                                _data.tool_id.c_str());
             return;
         }
 
@@ -1092,7 +1092,7 @@ private:
         _data.ready = true;
 #else
         consume_parameters(_args...);
-        PRINT_HERE("%s", "should not be here!");
+        TIMEMORY_PRINT_HERE("%s", "should not be here!");
 #endif
     }
 
@@ -1107,7 +1107,7 @@ private:
 #if defined(TIMEMORY_USE_GOTCHA)
         static auto& _data = get_data()[N];
 
-        // PRINT_HERE("%s", _data.tool_id.c_str());
+        // TIMEMORY_PRINT_HERE("%s", _data.tool_id.c_str());
 
         typedef Ret (*func_t)(Args...);
         using wrap_type = tim::component_tuple<operator_type>;
@@ -1126,7 +1126,7 @@ private:
         return _ret;
 #else
         consume_parameters(_args...);
-        PRINT_HERE("%s", "should not be here!");
+        TIMEMORY_PRINT_HERE("%s", "should not be here!");
         return Ret{};
 #endif
     }
@@ -1140,7 +1140,7 @@ private:
 #if defined(TIMEMORY_USE_GOTCHA)
         static auto& _data = get_data()[N];
 
-        // PRINT_HERE("%s", _data.tool_id.c_str());
+        // TIMEMORY_PRINT_HERE("%s", _data.tool_id.c_str());
 
         typedef void (*func_t)(Args...);
         using wrap_type = tim::component_tuple<operator_type>;
@@ -1160,7 +1160,7 @@ private:
         }
 #else
         consume_parameters(_args...);
-        PRINT_HERE("%s", "should not be here!");
+        TIMEMORY_PRINT_HERE("%s", "should not be here!");
 #endif
     }
 

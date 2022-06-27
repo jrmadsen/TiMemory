@@ -102,13 +102,13 @@ upc_get<Type, true>::operator()(distrib_type& results)
     auto& data = *m_storage;
 #if !defined(TIMEMORY_USE_UPCXX)
     if(settings::debug())
-        PRINT_HERE("%s", "timemory not using UPC++");
+        TIMEMORY_PRINT_HERE("%s", "timemory not using UPC++");
 
     results = distrib_type{};
     results.emplace_back(std::move(data.get()));
 #else
     if(settings::debug())
-        PRINT_HERE("%s", "timemory using UPC++");
+        TIMEMORY_PRINT_HERE("%s", "timemory using UPC++");
 
     upc::barrier();
 
@@ -195,9 +195,10 @@ upc_get<Type, true>::operator()(distrib_type& results)
         auto init_size = get_num_records(results);
         if(settings::debug() || settings::verbose() > 3)
         {
-            PRINT_HERE("[%s][pid=%i][rank=%i]> collapsing %i records from %i ranks",
-                       demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
-                       comm_rank, init_size, comm_size);
+            TIMEMORY_PRINT_HERE(
+                "[%s][pid=%i][rank=%i]> collapsing %i records from %i ranks",
+                demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
+                comm_rank, init_size, comm_size);
         }
 
         auto _collapsed = distrib_type{};
@@ -219,10 +220,11 @@ upc_get<Type, true>::operator()(distrib_type& results)
         if(settings::debug() || settings::verbose() > 3)
         {
             auto fini_size = get_num_records(results);
-            PRINT_HERE("[%s][pid=%i][rank=%i]> collapsed %i records into %i records "
-                       "from %i ranks",
-                       demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
-                       comm_rank, init_size, fini_size, comm_size);
+            TIMEMORY_PRINT_HERE(
+                "[%s][pid=%i][rank=%i]> collapsed %i records into %i records "
+                "from %i ranks",
+                demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
+                comm_rank, init_size, fini_size, comm_size);
         }
     }
     else if(comm_rank == 0 && settings::collapse_processes() &&
@@ -234,10 +236,11 @@ upc_get<Type, true>::operator()(distrib_type& results)
         int32_t bins  = comm_size / bsize;
 
         if(settings::debug() || settings::verbose() > 3)
-            PRINT_HERE("[%s][pid=%i][rank=%i]> node_count = %i, comm_size = %i, bins = "
-                       "%i, bin size = %i",
-                       demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
-                       comm_rank, settings::node_count(), comm_size, bins, bsize);
+            TIMEMORY_PRINT_HERE(
+                "[%s][pid=%i][rank=%i]> node_count = %i, comm_size = %i, bins = "
+                "%i, bin size = %i",
+                demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
+                comm_rank, settings::node_count(), comm_size, bins, bsize);
 
         // generate a map of the ranks to the node ids
         int32_t                              ncnt = 0;  // current count
@@ -246,9 +249,9 @@ upc_get<Type, true>::operator()(distrib_type& results)
         for(int32_t i = 0; i < comm_size; ++i)
         {
             if(settings::debug())
-                PRINT_HERE("[%s][pid=%i][rank=%i]> adding rank %i to bin %i",
-                           demangle<upc_get<Type, true>>().c_str(),
-                           (int) process::get_id(), comm_rank, i, midx);
+                TIMEMORY_PRINT_HERE("[%s][pid=%i][rank=%i]> adding rank %i to bin %i",
+                                    demangle<upc_get<Type, true>>().c_str(),
+                                    (int) process::get_id(), comm_rank, i, midx);
 
             binmap[midx].insert(i);
             // check to see if we reached the bin size
@@ -262,10 +265,11 @@ upc_get<Type, true>::operator()(distrib_type& results)
 
         auto init_size = get_num_records(results);
         if(settings::debug() || settings::verbose() > 3)
-            PRINT_HERE("[%s][pid=%i][rank=%i]> collapsing %i records from %i ranks into "
-                       "%i bins",
-                       demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
-                       comm_rank, init_size, comm_size, (int) binmap.size());
+            TIMEMORY_PRINT_HERE(
+                "[%s][pid=%i][rank=%i]> collapsing %i records from %i ranks into "
+                "%i bins",
+                demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
+                comm_rank, init_size, comm_size, (int) binmap.size());
 
         assert((int32_t) binmap.size() <= (int32_t) settings::node_count());
 
@@ -290,19 +294,20 @@ upc_get<Type, true>::operator()(distrib_type& results)
         if(settings::debug() || settings::verbose() > 3)
         {
             auto fini_size = get_num_records(results);
-            PRINT_HERE("[%s][pid=%i][rank=%i]> collapsed %i records into %i records "
-                       "and %i bins",
-                       demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
-                       comm_rank, init_size, fini_size, (int) results.size());
+            TIMEMORY_PRINT_HERE(
+                "[%s][pid=%i][rank=%i]> collapsed %i records into %i records "
+                "and %i bins",
+                demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
+                comm_rank, init_size, fini_size, (int) results.size());
         }
     }
 
     if(settings::debug() || settings::verbose() > 1)
     {
         auto ret_size = get_num_records(results);
-        PRINT_HERE("[%s][pid=%i]> %i total records on rank %i of %i",
-                   demangle<upc_get<Type, true>>().c_str(), (int) process::get_id(),
-                   ret_size, comm_rank, comm_size);
+        TIMEMORY_PRINT_HERE("[%s][pid=%i]> %i total records on rank %i of %i",
+                            demangle<upc_get<Type, true>>().c_str(),
+                            (int) process::get_id(), ret_size, comm_rank, comm_size);
     }
 
 #endif
@@ -322,13 +327,13 @@ upc_get<Type, true>::operator()(basic_tree_vector_type& bt)
     auto& data = *m_storage;
 #if !defined(TIMEMORY_USE_UPCXX)
     if(settings::debug())
-        PRINT_HERE("%s", "timemory not using UPC++");
+        TIMEMORY_PRINT_HERE("%s", "timemory not using UPC++");
 
     auto entry = basic_tree_type{};
     bt         = basic_tree_vector_type(1, data.get(entry));
 #else
     if(settings::debug())
-        PRINT_HERE("%s", "timemory using UPC++");
+        TIMEMORY_PRINT_HERE("%s", "timemory using UPC++");
 
     upc::barrier(upc::world());
 

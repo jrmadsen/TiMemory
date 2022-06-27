@@ -111,8 +111,8 @@ private:
     {
         if(was_executed<StateT>())
             return false;
-        CONDITIONAL_PRINT_HERE(tim::settings::debug(), "global init for %s",
-                               demangle<Tp>().c_str());
+        TIMEMORY_CONDITIONAL_PRINT_HERE(tim::settings::debug(), "global init for %s",
+                                        demangle<Tp>().c_str());
         type::global_init(_storage);
         was_executed<StateT>() = true;
         return true;
@@ -125,8 +125,8 @@ private:
     {
         if(was_executed<StateT>())
             return false;
-        CONDITIONAL_PRINT_HERE(tim::settings::debug(), "global init for %s",
-                               demangle<Tp>().c_str());
+        TIMEMORY_CONDITIONAL_PRINT_HERE(tim::settings::debug(), "global init for %s",
+                                        demangle<Tp>().c_str());
         type::global_init();
         was_executed<StateT>() = true;
         return true;
@@ -139,8 +139,8 @@ private:
     {
         if(was_executed<StateT>())
             return false;
-        CONDITIONAL_PRINT_HERE(tim::settings::debug(), "thread init for %s",
-                               demangle<Tp>().c_str());
+        TIMEMORY_CONDITIONAL_PRINT_HERE(tim::settings::debug(), "thread init for %s",
+                                        demangle<Tp>().c_str());
         type::thread_init(_storage);
         was_executed<StateT>() = true;
         return true;
@@ -153,8 +153,8 @@ private:
     {
         if(was_executed<StateT>())
             return false;
-        CONDITIONAL_PRINT_HERE(tim::settings::debug(), "thread init for %s",
-                               demangle<Tp>().c_str());
+        TIMEMORY_CONDITIONAL_PRINT_HERE(tim::settings::debug(), "thread init for %s",
+                                        demangle<Tp>().c_str());
         type::thread_init();
         was_executed<StateT>() = true;
         return true;

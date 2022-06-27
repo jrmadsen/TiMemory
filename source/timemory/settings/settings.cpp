@@ -411,7 +411,7 @@ settings::parse(settings* _settings)
 {
     if(!_settings)
     {
-        PRINT_HERE("%s", "nullptr to tim::settings");
+        TIMEMORY_PRINT_HERE("%s", "nullptr to tim::settings");
         return;
     }
 
@@ -420,7 +420,7 @@ settings::parse(settings* _settings)
         static auto _once = false;
         if(!_once)
         {
-            PRINT_HERE("%s", "settings parsing has been suppressed");
+            TIMEMORY_PRINT_HERE("%s", "settings parsing has been suppressed");
             _once = true;
         }
         return;
@@ -438,7 +438,7 @@ TIMEMORY_SETTINGS_INLINE
 settings::settings()
 : m_data(data_type{})
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     initialize();
 }
 //
@@ -476,7 +476,7 @@ TIMEMORY_SETTINGS_INLINE
 settings&
 settings::operator=(const settings& rhs)
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     if(this == &rhs)
         return *this;
 
@@ -563,7 +563,7 @@ TIMEMORY_SETTINGS_INLINE
 void
 settings::initialize_core()
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     auto homedir = get_env<string_t>("HOME");
 
     TIMEMORY_SETTINGS_MEMBER_ARG_IMPL(
@@ -622,7 +622,7 @@ TIMEMORY_SETTINGS_INLINE
 void
 settings::initialize_components()
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     TIMEMORY_SETTINGS_MEMBER_ARG_IMPL(
         string_t, global_components, TIMEMORY_SETTINGS_KEY("GLOBAL_COMPONENTS"),
         "A specification of components which is used by multiple variadic bundlers "
@@ -698,7 +698,7 @@ TIMEMORY_SETTINGS_INLINE
 void
 settings::initialize_io()
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     TIMEMORY_SETTINGS_MEMBER_ARG_IMPL(bool, auto_output,
                                       TIMEMORY_SETTINGS_KEY("AUTO_OUTPUT"),
                                       "Generate output at application termination", true,
@@ -796,7 +796,7 @@ TIMEMORY_SETTINGS_INLINE
 void
 settings::initialize_format()
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     TIMEMORY_SETTINGS_MEMBER_ARG_IMPL(
         string_t, time_format, TIMEMORY_SETTINGS_KEY("TIME_FORMAT"),
         "Customize the folder generation when TIMEMORY_TIME_OUTPUT is enabled (see "
@@ -874,7 +874,7 @@ TIMEMORY_SETTINGS_INLINE
 void
 settings::initialize_parallel()
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     TIMEMORY_SETTINGS_MEMBER_IMPL(size_t, max_thread_bookmarks,
                                   TIMEMORY_SETTINGS_KEY("MAX_THREAD_BOOKMARKS"),
                                   "Maximum number of times a worker thread bookmarks "
@@ -953,7 +953,7 @@ TIMEMORY_SETTINGS_INLINE
 void
 settings::initialize_tpls()
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     TIMEMORY_SETTINGS_MEMBER_ARG_IMPL(
         bool, papi_threading, TIMEMORY_SETTINGS_KEY("PAPI_THREADING"),
         "Enable multithreading support when using PAPI", true,
@@ -1072,7 +1072,7 @@ TIMEMORY_SETTINGS_INLINE
 void
 settings::initialize_roofline()
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     TIMEMORY_SETTINGS_MEMBER_ARG_IMPL(
         string_t, roofline_mode, TIMEMORY_SETTINGS_KEY("ROOFLINE_MODE"),
         "Configure the roofline collection mode. Options: 'op' 'ai'.", "op",
@@ -1138,7 +1138,7 @@ settings::initialize_roofline()
 TIMEMORY_SETTINGS_INLINE void
 settings::initialize_miscellaneous()
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     TIMEMORY_SETTINGS_MEMBER_ARG_IMPL(
         bool, add_secondary, TIMEMORY_SETTINGS_KEY("ADD_SECONDARY"),
         "Enable/disable components adding secondary (child) entries when available. "
@@ -1204,7 +1204,7 @@ TIMEMORY_SETTINGS_INLINE
 void
 settings::initialize_ert()
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     TIMEMORY_SETTINGS_MEMBER_IMPL(uint64_t, ert_num_threads,
                                   TIMEMORY_SETTINGS_KEY("ERT_NUM_THREADS"),
                                   "Number of threads to use when running ERT", 0);
@@ -1277,7 +1277,7 @@ TIMEMORY_SETTINGS_INLINE
 void
 settings::initialize_dart()
 {
-    // PRINT_HERE("%s", "");
+    // TIMEMORY_PRINT_HERE("%s", "");
     TIMEMORY_SETTINGS_MEMBER_ARG_IMPL(string_t, dart_type,
                                       TIMEMORY_SETTINGS_KEY("DART_TYPE"),
                                       "Only echo this measurement type (see also: "
@@ -1358,7 +1358,7 @@ settings::read(std::istream& ifs, std::string inp)
 {
     if(m_read_configs.find(inp) != m_read_configs.end())
     {
-        PRINT_HERE("Warning! Re-reading config file: %s", inp.c_str());
+        TIMEMORY_PRINT_HERE("Warning! Re-reading config file: %s", inp.c_str());
     }
     m_read_configs.emplace(inp);
 
@@ -1387,7 +1387,7 @@ settings::read(std::istream& ifs, std::string inp)
             ia->finishNode();
         } catch(tim::cereal::Exception& e)
         {
-            PRINT_HERE("Exception reading %s :: %s", inp.c_str(), e.what());
+            TIMEMORY_PRINT_HERE("Exception reading %s :: %s", inp.c_str(), e.what());
 #if defined(TIMEMORY_INTERNAL_TESTING)
             TIMEMORY_CONDITIONAL_DEMANGLED_BACKTRACE(true, 8);
 #endif
@@ -1573,7 +1573,7 @@ void
 settings::init_config(bool _search_default)
 {
     if(get_debug() || get_verbose() > 3)
-        PRINT_HERE("%s", "");
+        TIMEMORY_PRINT_HERE("%s", "");
 
     static const auto _dcfgs = std::set<std::string>{
         get_env<string_t>("HOME") + std::string("/.timemory.cfg"),

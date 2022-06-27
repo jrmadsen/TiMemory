@@ -73,9 +73,9 @@ storage::storage(bool _is_master, int64_t _instance_id, std::string _label)
     if(m_is_master && m_instance_id > 0)
     {
         int _id = m_instance_id;
-        PRINT_HERE("%s: %i (%s)",
-                   "Error! base::storage is master but is not zero instance", _id,
-                   m_label.c_str());
+        TIMEMORY_PRINT_HERE("%s: %i (%s)",
+                            "Error! base::storage is master but is not zero instance",
+                            _id, m_label.c_str());
         if(m_instance_id > 10)
         {
             // at this point we have a recursive loop
@@ -86,23 +86,23 @@ storage::storage(bool _is_master, int64_t _instance_id, std::string _label)
     if(!m_is_master && m_instance_id == 0)
     {
         int _id = m_instance_id;
-        PRINT_HERE("%s: %i (%s)",
-                   "Warning! base::storage is not master but is zero instance", _id,
-                   m_label.c_str());
+        TIMEMORY_PRINT_HERE("%s: %i (%s)",
+                            "Warning! base::storage is not master but is zero instance",
+                            _id, m_label.c_str());
     }
 
-    CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "%s: %i (%s)",
-                           "base::storage instance created", (int) m_instance_id,
-                           m_label.c_str());
+    TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "%s: %i (%s)",
+                                    "base::storage instance created", (int) m_instance_id,
+                                    m_label.c_str());
 }
 //
 //--------------------------------------------------------------------------------------//
 //
 TIMEMORY_STORAGE_LINKAGE storage::~storage()
 {
-    CONDITIONAL_PRINT_HERE(m_settings->get_debug(),
-                           "base::storage instance %i deleted for %s",
-                           (int) m_instance_id, m_label.c_str());
+    TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(),
+                                    "base::storage instance %i deleted for %s",
+                                    (int) m_instance_id, m_label.c_str());
 }
 //
 //--------------------------------------------------------------------------------------//
@@ -317,7 +317,8 @@ template <typename Type>
 storage<Type, true>::storage()
 : base_type(singleton_t::is_master_thread(), instance_count()++, demangle<Type>())
 {
-    CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "constructing %s", m_label.c_str());
+    TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "constructing %s",
+                                    m_label.c_str());
     TIMEMORY_CONDITIONAL_DEMANGLED_BACKTRACE(
         m_settings->get_debug() && m_settings->get_verbose() > 1, 16);
 
@@ -358,8 +359,8 @@ storage<Type, true>::~storage()
 
     auto _debug = m_settings->get_debug();
 
-    CONDITIONAL_PRINT_HERE(_debug, "[%s|%li]> destroying storage", m_label.c_str(),
-                           (long) m_instance_id);
+    TIMEMORY_CONDITIONAL_PRINT_HERE(_debug, "[%s|%li]> destroying storage",
+                                    m_label.c_str(), (long) m_instance_id);
 
     auto _main_instance = singleton_t::master_instance();
 
@@ -367,30 +368,32 @@ storage<Type, true>::~storage()
     {
         if(_main_instance)
         {
-            CONDITIONAL_PRINT_HERE(_debug, "[%s|%li]> merging into primary instance",
-                                   m_label.c_str(), (long) m_instance_id);
+            TIMEMORY_CONDITIONAL_PRINT_HERE(_debug,
+                                            "[%s|%li]> merging into primary instance",
+                                            m_label.c_str(), (long) m_instance_id);
             _main_instance->merge(this);
         }
         else
         {
-            CONDITIONAL_PRINT_HERE(_debug,
-                                   "[%s|%li]> skipping merge into non-existent primary "
-                                   "instance",
-                                   m_label.c_str(), (long) m_instance_id);
+            TIMEMORY_CONDITIONAL_PRINT_HERE(
+                _debug,
+                "[%s|%li]> skipping merge into non-existent primary "
+                "instance",
+                m_label.c_str(), (long) m_instance_id);
         }
     }
 
     if(m_graph_data_instance)
     {
-        CONDITIONAL_PRINT_HERE(_debug, "[%s|%li]> deleting graph data", m_label.c_str(),
-                               (long) m_instance_id);
+        TIMEMORY_CONDITIONAL_PRINT_HERE(_debug, "[%s|%li]> deleting graph data",
+                                        m_label.c_str(), (long) m_instance_id);
         delete m_graph_data_instance;
     }
 
     m_graph_data_instance = nullptr;
 
-    CONDITIONAL_PRINT_HERE(_debug, "[%s|%li]> storage destroyed", m_label.c_str(),
-                           (long) m_instance_id);
+    TIMEMORY_CONDITIONAL_PRINT_HERE(_debug, "[%s|%li]> storage destroyed",
+                                    m_label.c_str(), (long) m_instance_id);
 }
 //
 //--------------------------------------------------------------------------------------//
@@ -401,7 +404,8 @@ storage<Type, true>::initialize()
 {
     if(m_initialized)
         return;
-    CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "initializing %s", m_label.c_str());
+    TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "initializing %s",
+                                    m_label.c_str());
     TIMEMORY_CONDITIONAL_DEMANGLED_BACKTRACE(
         m_settings->get_debug() && m_settings->get_verbose() > 1, 16);
     m_initialized = true;
@@ -419,7 +423,8 @@ storage<Type, true>::finalize()
     if(!m_initialized)
         return;
 
-    CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "finalizing %s", m_label.c_str());
+    TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "finalizing %s",
+                                    m_label.c_str());
     TIMEMORY_CONDITIONAL_DEMANGLED_BACKTRACE(
         m_settings->get_debug() && m_settings->get_verbose() > 1, 16);
 
@@ -438,7 +443,8 @@ storage<Type, true>::finalize()
     if(m_is_master && m_global_init)
         fini_t(upcast, operation::mode_constant<operation::fini_mode::global>{});
 
-    CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "finalized %s", m_label.c_str());
+    TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "finalized %s",
+                                    m_label.c_str());
 }
 //
 //--------------------------------------------------------------------------------------//
@@ -471,8 +477,9 @@ storage<Type, true>::global_init()
 {
     if(!m_global_init)
     {
-        CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "[%s|%i]> invoking global_init",
-                               demangle<Type>().c_str(), (int) m_thread_idx);
+        TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(),
+                                        "[%s|%i]> invoking global_init",
+                                        demangle<Type>().c_str(), (int) m_thread_idx);
         if(!m_is_master && master_instance())
             master_instance()->global_init();
         m_global_init = true;
@@ -490,8 +497,9 @@ storage<Type, true>::thread_init()
     if(!m_thread_init)
     {
         global_init();
-        CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "[%s|%i]> invoking thread_init",
-                               demangle<Type>().c_str(), (int) m_thread_idx);
+        TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(),
+                                        "[%s|%i]> invoking thread_init",
+                                        demangle<Type>().c_str(), (int) m_thread_idx);
         if(!m_is_master && master_instance())
             master_instance()->thread_init();
         m_thread_init = true;
@@ -510,8 +518,9 @@ storage<Type, true>::data_init()
     {
         global_init();
         thread_init();
-        CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "[%s|%i]> invoking data_init",
-                               demangle<Type>().c_str(), (int) m_thread_idx);
+        TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(),
+                                        "[%s|%i]> invoking data_init",
+                                        demangle<Type>().c_str(), (int) m_thread_idx);
         if(!m_is_master && master_instance())
             master_instance()->data_init();
         m_data_init = true;
@@ -730,7 +739,7 @@ storage<Type, true>::_data()
             if(!lk.owns_lock())
                 lk.lock();
 
-            CONDITIONAL_PRINT_HERE(
+            TIMEMORY_CONDITIONAL_PRINT_HERE(
                 m_settings->get_debug(), "[%s]> Worker: %i, master ptr: %p",
                 demangle<Type>().c_str(), (int) m_thread_idx, (void*) &m);
             TIMEMORY_CONDITIONAL_DEMANGLED_BACKTRACE(
@@ -770,10 +779,10 @@ storage<Type, true>::_data()
                 m_graph_data_instance = new graph_data_t(node, 0, nullptr);
             m_graph_data_instance->depth()     = 0;
             m_graph_data_instance->sea_level() = 0;
-            CONDITIONAL_PRINT_HERE(m_settings->get_debug(),
-                                   "[%s]> Master: %i, master ptr: %p",
-                                   demangle<Type>().c_str(), (int) m_thread_idx,
-                                   (void*) m_graph_data_instance);
+            TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(),
+                                            "[%s]> Master: %i, master ptr: %p",
+                                            demangle<Type>().c_str(), (int) m_thread_idx,
+                                            (void*) m_graph_data_instance);
             TIMEMORY_CONDITIONAL_DEMANGLED_BACKTRACE(
                 m_settings->get_debug() && m_settings->get_verbose() > 1, 16);
         }
@@ -932,9 +941,10 @@ storage<Type, true>::internal_print()
 
     if(!_is_primary && !_primary_instance && common_singleton::is_main_thread())
     {
-        PRINT_HERE("[%s]> storage instance (%p) on main thread is not designated as the "
-                   "primary but there is a nullptr to primary. Designating as primary",
-                   m_label.c_str(), (void*) this);
+        TIMEMORY_PRINT_HERE(
+            "[%s]> storage instance (%p) on main thread is not designated as the "
+            "primary but there is a nullptr to primary. Designating as primary",
+            m_label.c_str(), (void*) this);
         _is_primary = true;
     }
 
@@ -1044,23 +1054,24 @@ storage<Type, true>::get_shared_manager()
                 auto _verb_v  = m_settings->get_verbose();
                 if(_debug_v || _verb_v > 1)
                 {
-                    PRINT_HERE("[%s] %s", demangle<Type>().c_str(),
-                               "calling singleton::reset(this)");
+                    TIMEMORY_PRINT_HERE("[%s] %s", demangle<Type>().c_str(),
+                                        "calling singleton::reset(this)");
                 }
                 _instance->reset(this);
                 if((m_is_master || common_singleton::is_main_thread()) && _instance)
                 {
                     if(_debug_v || _verb_v > 1)
                     {
-                        PRINT_HERE("[%s] %s", demangle<Type>().c_str(),
-                                   "calling singleton::reset()");
+                        TIMEMORY_PRINT_HERE("[%s] %s", demangle<Type>().c_str(),
+                                            "calling singleton::reset()");
                     }
                     _instance->reset();
                 }
             }
             else
             {
-                DEBUG_PRINT_HERE("[%s]> %p", demangle<Type>().c_str(), (void*) _instance);
+                TIMEMORY_DEBUG_PRINT_HERE("[%s]> %p", demangle<Type>().c_str(),
+                                          (void*) _instance);
             }
             if(m_is_master)
                 trait::runtime_enabled<Type>::set(false);
@@ -1091,7 +1102,8 @@ template <typename Type>
 storage<Type, false>::storage()
 : base_type(singleton_t::is_master_thread(), instance_count()++, demangle<Type>())
 {
-    CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "constructing %s", m_label.c_str());
+    TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "constructing %s",
+                                    m_label.c_str());
     TIMEMORY_CONDITIONAL_DEMANGLED_BACKTRACE(
         m_settings->get_debug() && m_settings->get_verbose() > 1, 16);
     get_shared_manager();
@@ -1105,7 +1117,8 @@ template <typename Type>
 storage<Type, false>::~storage()
 {
     component::state<Type>::has_storage() = false;
-    CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "destroying %s", m_label.c_str());
+    TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "destroying %s",
+                                    m_label.c_str());
 }
 //
 //--------------------------------------------------------------------------------------//
@@ -1132,7 +1145,8 @@ storage<Type, false>::initialize()
     if(m_initialized)
         return;
 
-    CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "initializing %s", m_label.c_str());
+    TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "initializing %s",
+                                    m_label.c_str());
     TIMEMORY_CONDITIONAL_DEMANGLED_BACKTRACE(
         m_settings->get_debug() && m_settings->get_verbose() > 1, 16);
 
@@ -1165,7 +1179,8 @@ storage<Type, false>::finalize()
     if(!m_initialized)
         return;
 
-    CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "finalizing %s", m_label.c_str());
+    TIMEMORY_CONDITIONAL_PRINT_HERE(m_settings->get_debug(), "finalizing %s",
+                                    m_label.c_str());
 
     using fini_t = operation::fini<Type>;
     using ValueT = typename trait::collects_data<Type>::type;
@@ -1276,23 +1291,24 @@ storage<Type, false>::get_shared_manager()
                 auto _verb_v  = m_settings->get_verbose();
                 if(_debug_v || _verb_v > 1)
                 {
-                    PRINT_HERE("[%s] %s", demangle<Type>().c_str(),
-                               "calling singleton::reset(this)");
+                    TIMEMORY_PRINT_HERE("[%s] %s", demangle<Type>().c_str(),
+                                        "calling singleton::reset(this)");
                 }
                 _instance->reset(this);
                 if((m_is_master || common_singleton::is_main_thread()) && _instance)
                 {
                     if(_debug_v || _verb_v > 1)
                     {
-                        PRINT_HERE("[%s] %s", demangle<Type>().c_str(),
-                                   "calling singleton::reset()");
+                        TIMEMORY_PRINT_HERE("[%s] %s", demangle<Type>().c_str(),
+                                            "calling singleton::reset()");
                     }
                     _instance->reset();
                 }
             }
             else
             {
-                DEBUG_PRINT_HERE("[%s]> %p", demangle<Type>().c_str(), (void*) _instance);
+                TIMEMORY_DEBUG_PRINT_HERE("[%s]> %p", demangle<Type>().c_str(),
+                                          (void*) _instance);
             }
             if(m_is_master)
                 trait::runtime_enabled<Type>::set(false);

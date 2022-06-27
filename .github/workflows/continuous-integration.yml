@@ -85,7 +85,7 @@ jobs:
         run: |
           echo "PATH=${HOME}/miniconda/bin:${PATH}" >> $GITHUB_ENV
           echo "CMAKE_ARGS=-DCMAKE_INSTALL_PREFIX=${HOME}/timemory-install -DTIMEMORY_SOCKET_TESTS=OFF ${{ matrix.CONFIG_ARGS }}" >> $GITHUB_ENV
-          echo "PYCTEST_ARGS=-SF --pyctest-model=Continuous --pyctest-site=GitHub -j 1 --compile-time-perf ${HOME}/ctp -cc ${{ matrix.CC }} -cxx ${{ matrix.CXX }} --pyctest-build-type=${{ matrix.BUILD_TYPE }} ${{ matrix.BUILD_ARGS }}" >> $GITHUB_ENV
+          echo "PYCTEST_ARGS=-F --pyctest-stages Start Update Configure --pyctest-model=Continuous --pyctest-site=GitHub -j 1 --compile-time-perf ${HOME}/ctp -cc ${{ matrix.CC }} -cxx ${{ matrix.CXX }} --pyctest-build-type=${{ matrix.BUILD_TYPE }} ${{ matrix.BUILD_ARGS }}" >> $GITHUB_ENV
           env | sort
 
       - name: Checkout Code
@@ -113,12 +113,26 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install pytest
 
-      - name: Build and Test
+      - name: Configure
         run: |
           source activate
           conda activate pyctest
           echo -e "Running command:\n$(which python) ./pyctest-runner.py ${PYCTEST_ARGS} -- ${CTEST_ARGS} -- ${CMAKE_ARGS}"
           python ./pyctest-runner.py ${PYCTEST_ARGS} -- ${CTEST_ARGS} -- ${CMAKE_ARGS}
+
+      - name: Build
+        working-directory: ${{github.workspace}}/build-timemory/Linux
+        run: |
+          source activate
+          conda activate pyctest
+          cmake --build build-timemory --target all --parallel 1
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build-timemory/Linux
+        run: |
+          source activate
+          conda activate pyctest
+          ctest ${CTEST_ARGS}
 
       - name: Update Log
         working-directory: ${{github.workspace}}/build-timemory/Linux
@@ -140,14 +154,7 @@ jobs:
         run: |
           for i in $(find Testing | grep LastTest); do echo "##### File: ${i} #####"; cat ${i}; done
 
-      - name: Validate Build
-        working-directory: ${{github.workspace}}/build-timemory/Linux
-        run: |
-          source activate
-          conda activate pyctest
-          cmake --build . --target all --parallel $(nproc)
-
-      - name: Test Install
+      - name: Install
         working-directory: ${{github.workspace}}/build-timemory/Linux
         run: |
           source activate

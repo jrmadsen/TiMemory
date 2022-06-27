@@ -55,6 +55,8 @@ using strvec_t            = std::vector<string_t>;
 using decor_line_map_t    = uomap_t<string_t, std::set<size_t>>;
 using file_line_map_t     = uomap_t<string_t, strvec_t>;
 //
+py::object sys_trace_func = py::none{};
+//
 struct config
 {
     bool     is_running        = false;
@@ -336,11 +338,16 @@ tracer_function(py::object pframe, const char* swhat, py::object arg)
         {
             if(_config.verbose > 1)
                 PRINT_HERE("Shutdown detected: %s", _func.c_str());
-            _disable       = true;
-            auto sys       = py::module::import("sys");
-            auto threading = py::module::import("threading");
-            sys.attr("settrace")(py::none{});
-            threading.attr("settrace")(py::none{});
+            _disable = true;
+            auto sys = py::module::import("sys");
+            try
+            {
+                sys.attr("settrace")(sys_trace_func);
+            } catch(std::runtime_error& _e)
+            {
+                if(_config.verbose > 1)
+                    PRINT_HERE("Exception: %s", _e.what());
+            }
             _disable = false;
         }
         return py::none{};
@@ -603,6 +610,13 @@ tracer_function(py::object pframe, const char* swhat, py::object arg)
 py::module
 generate(py::module& _pymod)
 {
+    auto sys = py::module::import("sys");
+    try
+    {
+        sys_trace_func = sys.attr("gettrace")();
+    } catch(std::runtime_error&)
+    {}
+
     py::module _trace =
         _pymod.def_submodule("trace", "Python tracing functions and "
                                       "C/C++/Fortran-compatible library "

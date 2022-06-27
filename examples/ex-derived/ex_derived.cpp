@@ -72,7 +72,7 @@ struct derived_cpu_util : public base<derived_cpu_util, double>
 
     bool derive(const wall_clock* wc, const cpu_clock* cc)
     {
-        // TIMEMORY_DEBUG_PRINT_HERE("%s: %p %p", "successful derivation", wc, cc);
+        // DEBUG_PRINT_HERE("%s: %p %p", "successful derivation", wc, cc);
         if(wc && cc)
         {
             value = 100.0 * (cc->get() / wc->get());
@@ -84,7 +84,7 @@ struct derived_cpu_util : public base<derived_cpu_util, double>
 
     bool derive(const wall_clock* wc, const user_clock* uc, const system_clock* sc)
     {
-        // TIMEMORY_DEBUG_PRINT_HERE("%s: %p %p %p", "successful derivation", wc, uc, sc);
+        // DEBUG_PRINT_HERE("%s: %p %p %p", "successful derivation", wc, uc, sc);
         if(wc && uc && sc)
         {
             value = 100.0 * ((uc->get() + sc->get()) / wc->get());

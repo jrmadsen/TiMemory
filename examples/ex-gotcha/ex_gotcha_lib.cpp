@@ -24,11 +24,13 @@
 
 #include "ex_gotcha_lib.hpp"
 
+#include "timemory/utility/demangle.hpp"
 #include "timemory/utility/macros.hpp"
 #include "timemory/utility/utility.hpp"
 
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <string>
 #include <thread>
 
@@ -66,7 +68,7 @@ do_exp_work(int nitr)
 {
 #if defined(VERBOSE)
     printf("\n");
-    TIMEMORY_PRINT_HERE("%s", "");
+    PRINT_HERE("%s", "");
     printf("\n");
 #endif
 
